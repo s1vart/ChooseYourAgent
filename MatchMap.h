@@ -1,4 +1,5 @@
 #include "Match.h"
+#include "idMaps.h"
 #include <iostream>
 #include <unordered_map>
 #include <fstream>
@@ -9,7 +10,7 @@ using namespace std;
 class MatchMap {
     unordered_map<int, Match> map;
 public:
-    MatchMap(const std::string& filename) {
+    MatchMap(const std::string& filename, matchTypeLookup &idMap) {
         std::unordered_map<int, Match> matches;
         std::ifstream file(filename);
         std::string line;
@@ -36,6 +37,7 @@ public:
 
             std::getline(iss, token, ',');
             match.matchName = token;
+
             match.parseTeams(match.matchName);
 
             std::getline(iss, token, ',');
@@ -45,6 +47,9 @@ public:
             string map = token;
             std::getline(iss, token, ','); // map
             string gameID = token;
+
+            match.matchTypeID = idMap.getMatchTypeID(match.tournament,match.stage,match.matchType);
+
             Game game(match.team1, match.team2, stoi(gameID), map);
             if (matches.find(match.matchID) == matches.end()) { // if match doesn't exist add game 1 and add to map
                 match.games.push_back(game);

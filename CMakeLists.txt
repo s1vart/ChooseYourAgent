@@ -8,4 +8,5 @@ add_executable(ChooseYourAgent main.cpp
         Match.h
         Game.h
         MatchMap.h
+        idMaps.h
 )

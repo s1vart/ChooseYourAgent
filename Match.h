@@ -14,6 +14,7 @@ struct Match {
     string matchType;
     string matchName;
     int matchID;
+    int matchTypeID;
     string team1;
     string team2;
     vector<Game> games;

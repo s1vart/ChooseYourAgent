@@ -9,8 +9,8 @@ struct Game {
     string team1;
     string team2;
     string map;
-    string win;
-    string loss;
+    string win = "none";
+    string loss = "none";
 
     Game(string team1, string team2, int gameID, string map) {
         this->team1 = team1;
