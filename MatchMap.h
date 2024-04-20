@@ -8,7 +8,9 @@
 using namespace std;
 
 class MatchMap {
-    unordered_map<int, Match> map;
+    unordered_map<int, Match> uniqueIDHashMap; // keys are just match IDS
+    unordered_map<string, unordered_map<string, unordered_map<string, unordered_map<string, Match>>>> data; // works the same as idMaps
+    int numGames = 0;
 public:
     MatchMap(const std::string& filename, matchTypeLookup &idMap) {
         std::unordered_map<int, Match> matches;
@@ -58,11 +60,21 @@ public:
             else { // if the match already exists add the game to it
                 matches[match.matchID].games.push_back(game);
             }
+            numGames++;
 
         }
-        this->map = matches;
+        this->uniqueIDHashMap = matches;
+        // setting our other map so we can get matches through match info / no unique identifier
+        setData();
     }
     int size() {
-        return map.size();
+        return uniqueIDHashMap.size();
+    }
+
+    void setData() {
+        for (auto iter : uniqueIDHashMap) {
+            // data[tournament][stage][matchType][match name] = match;
+            data[iter.second.tournament][iter.second.stage][iter.second.matchType][iter.second.matchName] = iter.second;
+        }
     }
 };

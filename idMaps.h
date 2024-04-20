@@ -8,7 +8,7 @@
 
 using namespace std;
 
-struct MatchInfo {
+struct MatchInfo { // simplified Match struct
     int tournamentID;
     int stageID;
     int matchTypeID;
