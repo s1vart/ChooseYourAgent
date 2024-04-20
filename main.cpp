@@ -1,6 +1,9 @@
 #include <iostream>
+#include "MatchMap.h"
+
+using namespace std;
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
+    MatchMap matches("tournaments_stages_matches_games_ids.csv");
+    cout << matches.size() << endl;
 }
