@@ -240,10 +240,11 @@ void MatchMap::mostPopularTeamComp(string map) {
         }
     }
     cout << "The most popular team composition on " << map
-    << " is " << mostPicked << " played a total of " << timesPicked
-    << " times in " << totalGamesPerMap[map] << " games\n" <<
-    "\tThis number can be bigger than the number of games because BOTH\n"
-    "\tteams are able to pick the same composition\n";
+    << " is " << mostPicked << "\nwhich was played a total of " << timesPicked
+    << " times in " << totalGamesPerMap[map] << " games\n";
+    if (timesPicked >= totalGamesPerMap[map])
+        cout <<"\tThis number can be bigger than the number of games because BOTH\n"
+        "\tteams are able to pick the same composition\n";
 }
 
 void MatchMap::gamesPerMapHelper(const string& map) {
