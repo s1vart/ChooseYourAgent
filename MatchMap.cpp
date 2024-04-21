@@ -7,7 +7,7 @@
 
 using namespace std;
 
-MatchMap::MatchMap(const std::string& filename, matchTypeLookup &idMap) {
+MatchMap::MatchMap(const std::string& filename) {
     std::unordered_map<int, Match> matches;
     std::ifstream file(filename);
     std::string line;

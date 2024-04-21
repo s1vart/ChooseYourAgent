@@ -11,11 +11,12 @@ class MatchMap {
     int numGames = 0;
     bool containsSubstring(const std::string& str1, const std::string& str2);
     void addGameData();
+    matchTypeLookup idMap;
 
 public:
     void checkTeamComps();
     unordered_map<string, unordered_map<string, unordered_map<string, unordered_map<string, Match>>>> data;
-    MatchMap(const string &filename, matchTypeLookup &idMap);
+    MatchMap(const string &filename);
     int size();
     void setData(); // moves the data from uniqueIDHashMap into more easily searchable format
     vector<Match> searchForMatch(string tournament, string stage, string matchType, string team); // specific match search
