@@ -17,6 +17,7 @@ class MatchMap {
     unordered_map<string, unordered_map<string, int>> teamCompTotalPicks;
     unordered_map<string, int> totalGamesPerMap;
     void gamesPerMapHelper(const string& map);
+    void countTeamComps(vector<string>&teamcompVector, string map);
 
 public:
     void checkTeamComps();

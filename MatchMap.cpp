@@ -46,6 +46,8 @@ MatchMap::MatchMap(const std::string& filename) {
         std::getline(iss, token, ','); // map
         string gameID = token;
 
+        gamesPerMapHelper(map);
+
         match.matchTypeID = idMap.getMatchTypeID(match.tournament,match.stage,match.matchType);
 
         Game game(match.team1, match.team2, stoi(gameID), map);
@@ -149,7 +151,6 @@ void MatchMap::addGameData() {
 
         std::getline(iss, token, ','); // total loss by map
         string loss = token;
-        gamesPerMapHelper(map);
 
         std::getline(iss, token, ','); // total maps played
         if (!containsSubstring(stage, "All Stages")) {
@@ -159,20 +160,30 @@ void MatchMap::addGameData() {
                 if (iter.second.games.find(map) != iter.second.games.end()) {
                     if (containsSubstring(iter.second.matchName, team)) {
                         if (iter.second.team2 == team) {
+
                             iter.second.games[map].team2comp.emplace_back(agent);
                             sortTeamComp(iter.second.games[map].team2comp, map);
+
                             uniqueIDHashMap[iter.second.matchID].games[map].team2comp.emplace_back(agent);
                             sortTeamComp(uniqueIDHashMap[iter.second.matchID].games[map].team2comp, map);
+
+                            countTeamComps(iter.second.games[map].team2comp, map);
+
                             if (win == "1") {
                                 iter.second.games[map].winningTeam = team;
                                 uniqueIDHashMap[iter.second.matchID].games[map].winningTeam = team;
                             }
                         }
                         if (iter.second.team1 == team) {
+
                             iter.second.games[map].team1comp.emplace_back(agent);
                             sortTeamComp(iter.second.games[map].team1comp, map);
+
                             uniqueIDHashMap[iter.second.matchID].games[map].team1comp.emplace_back(agent);
                             sortTeamComp(uniqueIDHashMap[iter.second.matchID].games[map].team1comp, map);
+
+                            countTeamComps(iter.second.games[map].team1comp, map);
+
                             if (win == "1") {
                                 iter.second.games[map].winningTeam = team;
                                 uniqueIDHashMap[iter.second.matchID].games[map].winningTeam = team;
@@ -211,17 +222,8 @@ void MatchMap::checkTeamComps() {
 }
 
 void MatchMap::sortTeamComp(vector<string> &teamcompVector, string map) {
-    string agentList;
-    if (teamcompVector.size() == 5) {
+    if (teamcompVector.size() == 5)
         std::sort(teamcompVector.begin(), teamcompVector.end());
-        for (auto agent : teamcompVector) {
-            agentList += agent + ",";
-        }
-        if (teamCompTotalPicks[map].find(agentList) == teamCompTotalPicks[map].end())
-            teamCompTotalPicks[map].emplace(agentList, 1);
-        else
-            teamCompTotalPicks[map][agentList]++;
-    }
 }
 
 void MatchMap::mostPopularTeamComp(string map) {
@@ -235,7 +237,9 @@ void MatchMap::mostPopularTeamComp(string map) {
     }
     cout << "The most popular team composition on " << map
     << " is " << mostPicked << " played a total of " << timesPicked
-    << " times\n";
+    << " times in " << totalGamesPerMap[map] << " games\n" <<
+    "\tThis number can be bigger than the number of games because BOTH\n"
+    "\tteams are able to pick the same composition\n";
 }
 
 void MatchMap::gamesPerMapHelper(const string& map) {
@@ -244,5 +248,18 @@ void MatchMap::gamesPerMapHelper(const string& map) {
     }
     else {
         totalGamesPerMap[map]++;
+    }
+}
+
+void MatchMap::countTeamComps(vector<string> &teamcompVector, string map) {
+    string agentList;
+    if (teamcompVector.size() == 5) {
+        for (auto &agent: teamcompVector) {
+            agentList += agent + ",";
+        }
+        if (teamCompTotalPicks[map].find(agentList) == teamCompTotalPicks[map].end())
+            teamCompTotalPicks[map].emplace(agentList, 1);
+        else
+            teamCompTotalPicks[map][agentList]++;
     }
 }
