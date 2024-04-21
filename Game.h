@@ -1,17 +1,23 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#pragma once
 
 using namespace std;
 
 struct Game {
-    int gameID;
+    Game() {
+
+    }
+
+    int gameID = 0;
     string team1;
     string team2;
     string map;
-    string win = "none";
-    string loss = "none";
-
+    string win;
+    string loss;
+    vector<string> team1comp;
+    vector<string> team2comp;
     Game(string team1, string team2, int gameID, string map) {
         this->team1 = team1;
         this->team2 = team2;
@@ -20,3 +26,4 @@ struct Game {
     }
 
 };
+

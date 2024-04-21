@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <map>
 #include "Game.h"
 
 using namespace std;
@@ -17,7 +18,7 @@ struct Match {
     int matchTypeID;
     string team1;
     string team2;
-    vector<Game> games;
+    map<string, Game> games;
 
     void parseTeams(const std::string& input) {
         // Find the position of "vs" in the input string

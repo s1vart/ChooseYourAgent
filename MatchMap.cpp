@@ -4,6 +4,7 @@
 #include <sstream>
 #include "MatchMap.h"
 
+
 using namespace std;
 
 MatchMap::MatchMap(const std::string& filename, matchTypeLookup &idMap) {
@@ -48,11 +49,11 @@ MatchMap::MatchMap(const std::string& filename, matchTypeLookup &idMap) {
 
         Game game(match.team1, match.team2, stoi(gameID), map);
         if (matches.find(match.matchID) == matches.end()) { // if match doesn't exist add game 1 and add to map
-            match.games.push_back(game);
+            match.games.emplace(game.map, game);
             matches[match.matchID] = match; // Match ID as key
         }
         else { // if the match already exists add the game to it
-            matches[match.matchID].games.push_back(game);
+            matches[match.matchID].games.emplace(game.map, game);
         }
         numGames++;
 
@@ -60,6 +61,7 @@ MatchMap::MatchMap(const std::string& filename, matchTypeLookup &idMap) {
     this->uniqueIDHashMap = matches;
     // setting our other map so we can get matches through match info / no unique identifier
     setData();
+    addGameData();
 }
 
 int MatchMap::size() {
@@ -87,6 +89,8 @@ bool MatchMap::containsSubstring(const string &str1, const string &str2) {
     if (str1.empty() || str2.empty()) {
         return false;
     }
+    if (str1.length() <= str2.length())
+        return false;
 
     // Iterate through the first string
     for (size_t i = 0; i <= str1.length() - str2.length(); ++i) {
@@ -100,9 +104,81 @@ bool MatchMap::containsSubstring(const string &str1, const string &str2) {
 
 vector<Match> MatchMap::searchForMatch(string team) {
     vector<Match> output;
+    int numMatches = 0;
     for (auto iter : uniqueIDHashMap) {
-        if (containsSubstring(iter.second.matchName, team))
+        if (containsSubstring(iter.second.matchName, team)) {
             output.push_back(iter.second);
+            numMatches++;
+        }
     }
+    cout << team << " played " << numMatches << " official matches in 2023" << endl;
     return output;
+}
+
+void MatchMap::addGameData() {
+    std::unordered_map<int, Match> matches;
+    std::ifstream file(agentPickCSV);
+    std::string line;
+    std::getline(file, line);
+    int i = 0;
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        std::string token;
+
+        std::getline(iss, token, ','); // tournament
+        string tournament = token;
+
+        std::getline(iss, token, ','); // stage
+        string stage = token;
+
+        std::getline(iss, token, ','); // match type
+        string matchType = token;
+
+        std::getline(iss, token, ','); // map
+        string map = token;
+
+        std::getline(iss, token, ','); // team
+        string team = token;
+
+        std::getline(iss, token, ','); // agent picked
+        string agent = token;
+
+        std::getline(iss, token, ','); // total wins by map
+        string win = token;
+
+        std::getline(iss, token, ','); // total loss by map
+        string loss = token;
+
+        std::getline(iss, token, ','); // total maps played
+        if (!containsSubstring(stage, "All Stages")) {
+            for (auto &iter: data[tournament][stage][matchType]) {
+//            i++;
+//            cout << tournament << stage << matchType << team << matchType << map << i << endl;
+                if (containsSubstring(iter.second.matchName, team)) {
+                    if (iter.second.team2 == team) {
+                        iter.second.games[map].team2comp.emplace_back(agent);
+                        uniqueIDHashMap[iter.second.matchID].games[map].team2comp.emplace_back(agent);
+                    }
+                    else {
+                        iter.second.games[map].team1comp.emplace_back(agent);
+                        uniqueIDHashMap[iter.second.matchID].games[map].team1comp.emplace_back(agent);
+                    }
+                }
+            }
+        }
+
+
+    }
+}
+
+void MatchMap::checkTeamComps() {
+    int i = 1;
+    for (auto iter : uniqueIDHashMap) {
+        for (auto game : iter.second.games) {
+            if (game.second.team2comp.size() != 5)
+                cout << "error in " << iter.second.tournament << " " <<
+                iter.second.stage << " " << iter.second.matchType << " " <<
+                iter.second.matchName << " " << game.second.map << " " << i++ << endl;
+        }
+    }
 }

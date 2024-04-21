@@ -11,5 +11,9 @@ int main() {
     MatchMap matches("tournaments_stages_matches_games_ids.csv", idMap);
     vector<Match> search = matches.searchForMatch("Champions Tour 2023: EMEA Last Chance Qualifier","Playoffs","Knockout Round","Team Heretics");
     vector<Match> searchAll = matches.searchForMatch("Sentinels");
+    matches.checkTeamComps();
+    //    for (auto match : searchAll) {
+//        cout << match.matchName << endl;
+//    }
 
 }
