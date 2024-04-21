@@ -25,7 +25,7 @@ struct Match {
         size_t vsPos = input.find("vs");
 
         // Extract team1 (substring before "vs")
-        this->team1 = input.substr(0, vsPos);
+        this->team1 = input.substr(0, vsPos-1);
 
         // Extract team2 (substring after "vs")
         this->team2 = input.substr(vsPos + 3); // +3 to skip "vs" and the space after it

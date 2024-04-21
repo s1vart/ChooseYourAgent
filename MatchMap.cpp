@@ -154,14 +154,24 @@ void MatchMap::addGameData() {
             for (auto &iter: data[tournament][stage][matchType]) {
 //            i++;
 //            cout << tournament << stage << matchType << team << matchType << map << i << endl;
-                if (containsSubstring(iter.second.matchName, team)) {
-                    if (iter.second.team2 == team) {
-                        iter.second.games[map].team2comp.emplace_back(agent);
-                        uniqueIDHashMap[iter.second.matchID].games[map].team2comp.emplace_back(agent);
-                    }
-                    else {
-                        iter.second.games[map].team1comp.emplace_back(agent);
-                        uniqueIDHashMap[iter.second.matchID].games[map].team1comp.emplace_back(agent);
+                if (iter.second.games.find(map) != iter.second.games.end()) {
+                    if (containsSubstring(iter.second.matchName, team)) {
+                        if (iter.second.team2 == team) {
+                            iter.second.games[map].team2comp.emplace_back(agent);
+                            uniqueIDHashMap[iter.second.matchID].games[map].team2comp.emplace_back(agent);
+                            if (win == "1") {
+                                iter.second.games[map].winningTeam = team;
+                                uniqueIDHashMap[iter.second.matchID].games[map].winningTeam = team;
+                            }
+                        }
+                        if (iter.second.team1 == team) {
+                            iter.second.games[map].team1comp.emplace_back(agent);
+                            uniqueIDHashMap[iter.second.matchID].games[map].team1comp.emplace_back(agent);
+                            if (win == "1") {
+                                iter.second.games[map].winningTeam = team;
+                                uniqueIDHashMap[iter.second.matchID].games[map].winningTeam = team;
+                            }
+                        }
                     }
                 }
             }

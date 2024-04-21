@@ -14,7 +14,7 @@ struct Game {
     string team1;
     string team2;
     string map;
-    string winingTeam;
+    string winningTeam;
     vector<string> team1comp;
     vector<string> team2comp;
     Game(string team1, string team2, int gameID, string map) {
