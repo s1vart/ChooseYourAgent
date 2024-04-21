@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include "MatchMap.h"
+#include <algorithm>
 
 
 using namespace std;
@@ -148,6 +149,7 @@ void MatchMap::addGameData() {
 
         std::getline(iss, token, ','); // total loss by map
         string loss = token;
+        gamesPerMapHelper(map);
 
         std::getline(iss, token, ','); // total maps played
         if (!containsSubstring(stage, "All Stages")) {
@@ -158,7 +160,9 @@ void MatchMap::addGameData() {
                     if (containsSubstring(iter.second.matchName, team)) {
                         if (iter.second.team2 == team) {
                             iter.second.games[map].team2comp.emplace_back(agent);
+                            sortTeamComp(iter.second.games[map].team2comp, map);
                             uniqueIDHashMap[iter.second.matchID].games[map].team2comp.emplace_back(agent);
+                            sortTeamComp(uniqueIDHashMap[iter.second.matchID].games[map].team2comp, map);
                             if (win == "1") {
                                 iter.second.games[map].winningTeam = team;
                                 uniqueIDHashMap[iter.second.matchID].games[map].winningTeam = team;
@@ -166,7 +170,9 @@ void MatchMap::addGameData() {
                         }
                         if (iter.second.team1 == team) {
                             iter.second.games[map].team1comp.emplace_back(agent);
+                            sortTeamComp(iter.second.games[map].team1comp, map);
                             uniqueIDHashMap[iter.second.matchID].games[map].team1comp.emplace_back(agent);
+                            sortTeamComp(uniqueIDHashMap[iter.second.matchID].games[map].team1comp, map);
                             if (win == "1") {
                                 iter.second.games[map].winningTeam = team;
                                 uniqueIDHashMap[iter.second.matchID].games[map].winningTeam = team;
@@ -201,5 +207,42 @@ void MatchMap::checkTeamComps() {
             }
 
         }
+    }
+}
+
+void MatchMap::sortTeamComp(vector<string> &teamcompVector, string map) {
+    string agentList;
+    if (teamcompVector.size() == 5) {
+        std::sort(teamcompVector.begin(), teamcompVector.end());
+        for (auto agent : teamcompVector) {
+            agentList += agent + ",";
+        }
+        if (teamCompTotalPicks[map].find(agentList) == teamCompTotalPicks[map].end())
+            teamCompTotalPicks[map].emplace(agentList, 1);
+        else
+            teamCompTotalPicks[map][agentList]++;
+    }
+}
+
+void MatchMap::mostPopularTeamComp(string map) {
+    string mostPicked;
+    int timesPicked = 0;
+    for (auto &teamComp : teamCompTotalPicks[map]) {
+        if (teamComp.second > timesPicked) {
+            mostPicked = teamComp.first;
+            timesPicked = teamComp.second;
+        }
+    }
+    cout << "The most popular team composition on " << map
+    << " is " << mostPicked << " played a total of " << timesPicked
+    << " times\n";
+}
+
+void MatchMap::gamesPerMapHelper(const string& map) {
+    if (totalGamesPerMap.find(map) == totalGamesPerMap.end()) {
+        totalGamesPerMap.emplace(map, 1);
+    }
+    else {
+        totalGamesPerMap[map]++;
     }
 }
