@@ -14,7 +14,7 @@ struct MatchInfo { // simplified Match struct
     int matchTypeID;
 };
 
-class matchTypeLookup {
+class idMaps {
 private:
     unordered_map<string, unordered_map<string, unordered_map<string, MatchInfo>>> data; // Tournament -> Stage -> Match Type -> Match Info
 

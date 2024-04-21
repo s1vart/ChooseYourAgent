@@ -11,7 +11,7 @@ class MatchMap {
     int numGames = 0;
     bool containsSubstring(const std::string& str1, const std::string& str2);
     void addGameData();
-    matchTypeLookup idMap;
+    idMaps idMap;
 
 public:
     void checkTeamComps();
