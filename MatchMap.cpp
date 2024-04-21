@@ -185,10 +185,21 @@ void MatchMap::checkTeamComps() {
     int i = 1;
     for (auto iter : uniqueIDHashMap) {
         for (auto game : iter.second.games) {
-            if (game.second.team2comp.size() != 5)
-                cout << "error in " << iter.second.tournament << " " <<
-                iter.second.stage << " " << iter.second.matchType << " " <<
-                iter.second.matchName << " " << game.second.map << " " << i++ << endl;
+            if (game.second.team2comp.size() != 5) {
+                cout << "missing agent data error#" << i++ << " in " << iter.second.tournament << " " <<
+                     iter.second.stage << " " << iter.second.matchType << " " <<
+                     iter.second.matchName << " " << game.second.map << " " << endl;
+                cout <<"\t" << game.second.team2
+                     << " has a team of less than 5 agents on " << game.second.map << endl;
+            }
+            if (game.second.team1comp.size() != 5) {
+                cout << "missing agent data error#" << i++ << " in " << iter.second.tournament << " " <<
+                     iter.second.stage << " " << iter.second.matchType << " " <<
+                     iter.second.matchName << " " << game.second.map << " "  << endl;
+                cout <<"\t" << game.second.team1
+                << " has a team of less than 5 agents on " << game.second.map << endl;
+            }
+
         }
     }
 }
