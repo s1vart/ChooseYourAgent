@@ -227,6 +227,10 @@ void MatchMap::sortTeamComp(vector<string> &teamcompVector, string map) {
 }
 
 void MatchMap::mostPopularTeamComp(string map) {
+    if (teamCompTotalPicks.find(map) == teamCompTotalPicks.end()) {
+        cout << map << " was not played during this time period\n";
+        return;
+    }
     string mostPicked;
     int timesPicked = 0;
     for (auto &teamComp : teamCompTotalPicks[map]) {
