@@ -55,6 +55,12 @@ build CMakeFiles/ChooseYourAgent.dir/main.cpp.obj: CXX_COMPILER__ChooseYourAgent
   OBJECT_DIR = CMakeFiles\ChooseYourAgent.dir
   OBJECT_FILE_DIR = CMakeFiles\ChooseYourAgent.dir
 
+build CMakeFiles/ChooseYourAgent.dir/MatchMap.cpp.obj: CXX_COMPILER__ChooseYourAgent_unscanned_Debug C$:/Users/monst/CLionProjects/ChooseYourAgent/MatchMap.cpp || cmake_object_order_depends_target_ChooseYourAgent
+  DEP_FILE = CMakeFiles\ChooseYourAgent.dir\MatchMap.cpp.obj.d
+  FLAGS = -g -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\ChooseYourAgent.dir
+  OBJECT_FILE_DIR = CMakeFiles\ChooseYourAgent.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target ChooseYourAgent
@@ -63,7 +69,7 @@ build CMakeFiles/ChooseYourAgent.dir/main.cpp.obj: CXX_COMPILER__ChooseYourAgent
 #############################################
 # Link the executable ChooseYourAgent.exe
 
-build ChooseYourAgent.exe: CXX_EXECUTABLE_LINKER__ChooseYourAgent_Debug CMakeFiles/ChooseYourAgent.dir/main.cpp.obj
+build ChooseYourAgent.exe: CXX_EXECUTABLE_LINKER__ChooseYourAgent_Debug CMakeFiles/ChooseYourAgent.dir/main.cpp.obj CMakeFiles/ChooseYourAgent.dir/MatchMap.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\ChooseYourAgent.dir
