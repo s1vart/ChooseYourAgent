@@ -4,6 +4,7 @@
 #include <sstream>
 #include "MatchMap.h"
 #include <algorithm>
+#include <queue>
 
 
 using namespace std;
@@ -153,10 +154,8 @@ void MatchMap::addGameData() {
         string loss = token;
 
         std::getline(iss, token, ','); // total maps played
-        if (!containsSubstring(stage, "All Stages")) {
-            for (auto &iter: data[tournament][stage][matchType]) {
-//            i++;
-//            cout << tournament << stage << matchType << team << matchType << map << i << endl;
+        if (stage != "All Stages") {
+            for (auto &iter: data[tournament][stage][matchType]) { // for every match in this section of the tournament
                 if (iter.second.games.find(map) != iter.second.games.end()) {
                     if (containsSubstring(iter.second.matchName, team)) {
                         if (iter.second.team2 == team) {
@@ -267,4 +266,203 @@ void MatchMap::countTeamComps(vector<string> &teamcompVector, string map) {
         else
             teamCompTotalPicks[map][agentList]++;
     }
+}
+
+void MatchMap::setPlayerStats() {
+    std::ifstream file(playerStatsCSV);
+    std::string line;
+    std::getline(file, line);
+    int i = 0;
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        std::string token;
+        Player player;
+
+        std::getline(iss, token, ','); // tournament
+        player.tournament = token;
+
+        std::getline(iss, token, ','); // stage
+        player.stage = token;
+
+        std::getline(iss, token, ','); // match type
+        string matchType = token;
+
+        std::getline(iss, token, ','); // player
+        player.name = token;
+
+        std::getline(iss, token, ','); // team
+        player.team = token;
+
+        std::getline(iss, token, ','); // agent(s) picked
+        player.agents = token;
+
+        std::getline(iss, token, ','); // rounds played
+        player.rounds = stoi(token);
+        std::getline(iss, token, ','); // rating
+        if (!token.empty())
+            player.rating = stof(token);
+        else {
+            player.rating = -1;
+        }
+        std::getline(iss, token, ','); // Average combat score
+        if (!token.empty())
+            player.ACS = stoi(token);
+        else {
+            player.ACS = -1;
+        }
+        std::getline(iss, token, ','); // k/d ratio
+
+        std::getline(iss, token, ','); // KAST %
+
+        std::getline(iss, token, ','); // ADR
+
+        std::getline(iss, token, ','); // kills per round
+
+        std::getline(iss, token, ','); // assists per round
+
+        std::getline(iss, token, ','); // first kills per round
+
+        std::getline(iss, token, ','); // first deaths per round
+
+        std::getline(iss, token, ','); // headshot %
+
+        std::getline(iss, token, ','); // clutch success %
+
+        std::getline(iss, token, ','); // clutches won/played
+
+        std::getline(iss, token, ','); // max kills in a single map
+
+        std::getline(iss, token, ','); // kills
+
+        std::getline(iss, token, ','); // deaths
+
+        std::getline(iss, token, ','); // assists
+
+        std::getline(iss, token, ','); // first kills
+
+        std::getline(iss, token, ','); // first deaths
+        if (player.stage == "All Stages") {
+            if (playerStatsMap[player.tournament].find(player.name) == playerStatsMap[player.tournament].end()) {
+                playerStatsMap[player.tournament].emplace(player.name, player);
+            }
+            else {
+                if (playerStatsMap[player.tournament].find(player.name)->second.rounds < player.rounds)
+                    playerStatsMap[player.tournament].find(player.name)->second = player;
+            }
+            // yeah yeah
+
+        }
+    }
+}
+
+struct CompareByRating {
+    bool operator()(const Player& p1, const Player& p2) {
+        // Note: We want the min heap, so return true if p1's rating is greater than p2's rating
+        return p1.rating > p2.rating;
+    }
+};
+
+vector<Player> MatchMap::kLargestRatings(string& tournament, int k, int minRounds) {
+    vector<Player> players;
+    for (auto &iter : playerStatsMap[tournament]) {
+        players.push_back(iter.second);
+    }
+
+
+    priority_queue<Player, vector<Player>, CompareByRating> minHeap;
+
+    // Push the first k players into the min heap
+    int j = 0;
+    while (minHeap.size() < k) {
+        if (players[j].rounds >= minRounds)
+            minHeap.push(players[j]);
+        j++;
+    }
+
+    // For the rest of the players, if the player's rating is greater than the top player's rating of the min heap, pop the top and push the current player
+    for (int i = k; i < players.size(); ++i) {
+        if (players[i].rating > minHeap.top().rating && players[i].rounds >= minRounds) {
+            minHeap.pop();
+            minHeap.push(players[i]);
+        }
+    }
+
+    // Collect the k largest players from the min heap
+    vector<Player> result;
+    while (!minHeap.empty()) {
+        result.push_back(minHeap.top());
+        minHeap.pop();
+    }
+
+    // Reverse the result to get the players in descending order of rating
+    reverse(result.begin(), result.end());
+    return result;
+}
+
+void MatchMap::topRatedPlayers() {
+    vector<Player> players;
+    cout << R"(1 - Champions Tour 2023: Americas Last Chance Qualifier
+2 - Champions Tour 2023: Pacific Last Chance Qualifier
+3 - Champions Tour 2023: EMEA Last Chance Qualifier
+4 - Champions Tour 2023: Masters Tokyo
+5 - Champions Tour 2023: Americas League
+6 - Champions Tour 2023: EMEA League
+7 - Champions Tour 2023: Pacific League
+8 - Champions Tour 2023: Lock-In Sao Paulo
+9 - Valorant Champions 2023
+Type an integer 1 - 9 to select a Tournament
+)";
+    int tournamentChoice;
+    cin >> tournamentChoice;
+
+    string tournament;
+    if (tournamentChoice == 1)
+        tournament = "Champions Tour 2023: Americas Last Chance Qualifier";
+    else if (tournamentChoice == 2)
+        tournament = "Champions Tour 2023: Pacific Last Chance Qualifier";
+    else if (tournamentChoice == 3)
+        tournament = "Champions Tour 2023: EMEA Last Chance Qualifier";
+    else if (tournamentChoice == 4)
+        tournament = "Champions Tour 2023: Masters Tokyo";
+    else if (tournamentChoice == 5)
+        tournament = "Champions Tour 2023: Americas League";
+    else if (tournamentChoice == 6)
+        tournament = "Champions Tour 2023: EMEA League";
+    else if (tournamentChoice == 7)
+        tournament = "Champions Tour 2023: Pacific League";
+    else if (tournamentChoice == 8)
+        tournament = "Champions Tour 2023: Lock-In Sao Paulo";
+    else if (tournamentChoice == 9)
+        tournament = "Valorant Champions 2023";
+
+    cout << R"(This function displays the K top rated players from a tournament.
+Enter and integer between 1 - 100 for K, or enter -1 to view all
+player ratings in a descending order
+)";
+
+    int k;
+    cin >> k;
+
+    cout << R"(What is the minimum number of rounds to be including in this list?
+Please choose an integer between 1 - 515; 150 is reccomended.
+)";
+    int rounds;
+    cin >> rounds;
+
+    if (k == -1) {
+        cout << R"(Do you want to use quicksort or heapsort
+1 - Quick sort
+2- Heap sort
+)";
+
+    }
+    else if (k >= 1 && k <= 100) {
+        players = kLargestRatings(tournament, k, rounds);
+    }
+    int i = 1;
+    for (auto &player : players) {
+        cout << i << ". " << player.name << " Rating: " << player.rating << endl;
+        i++;
+    }
+
 }

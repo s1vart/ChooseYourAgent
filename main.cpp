@@ -7,7 +7,7 @@ using namespace std;
 
 
 int main() {
-    MatchMap matches("tournaments_stages_matches_games_ids.csv");
+    MatchMap matches("vct2023/tournaments_stages_matches_games_ids.csv");
     vector<Match> search = matches.searchForMatch("Champions Tour 2023: EMEA Last Chance Qualifier","Playoffs","Knockout Round","Team Heretics");
     vector<Match> searchAll = matches.searchForMatch("Sentinels");
   //  matches.checkTeamComps();
@@ -15,5 +15,7 @@ int main() {
 //        cout << match.matchName << endl;
 //    }
     matches.mostPopularTeamComp("Breeze");
-    matches.mostPopularTeamComp("Icebox");
+    matches.mostPopularTeamComp("Lotus");
+    matches.setPlayerStats();
+    matches.topRatedPlayers();
 }

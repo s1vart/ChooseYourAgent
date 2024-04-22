@@ -47,8 +47,8 @@ private:
     }
 
 public:
-    matchTypeLookup() {
-        storeCSVData("tournaments_stages_match_types_ids.csv");
+    idMaps() {
+        storeCSVData("vct2023/tournaments_stages_match_types_ids.csv");
     }
     // Function to add match information
     void addMatchInfo(const string& tournament, const string& stage, const string& matchType, int tournamentID, int stageID, int matchTypeID) {
