@@ -5,6 +5,7 @@
 #include "MatchMap.h"
 #include <algorithm>
 #include <queue>
+#include <chrono>
 
 
 using namespace std;
@@ -403,6 +404,63 @@ vector<Player> MatchMap::kLargestRatings(string& tournament, int k, int minRound
     return result;
 }
 
+vector<Player> MatchMap::HeapSort(string& tournament, int minRounds){
+    vector<Player> players;
+    for (auto &iter : playerStatsMap[tournament]) {
+        if (iter.second.rounds >= minRounds)
+            players.push_back(iter.second);
+    }
+
+
+    priority_queue<Player, vector<Player>, CompareByRating> minHeap;
+
+
+    for (const auto & player : players) {
+        minHeap.push(player);
+    }
+
+    // Collect the k largest players from the min heap
+    vector<Player> result;
+    while (!minHeap.empty()) {
+        result.push_back(minHeap.top());
+        minHeap.pop();
+    }
+
+    // Reverse the result to get the players in descending order of rating
+    reverse(result.begin(), result.end());
+    return result;
+}
+
+void MatchMap::QuickSort(vector<Player>& players, int low, int high){
+
+    if (low < high){
+        float pivot = partition(players, low, high);
+        QuickSort(players, low, pivot - 1);
+        QuickSort(players,pivot + 1, high);
+    }
+
+}
+
+int MatchMap::partition(vector<Player>& players, int low, int high){
+    //select pivot element
+    float pivot = players[low].rating;
+    int up = low;
+    int down = high;
+
+    while (up < down){
+        while (up <= high && players[up].rating >= pivot){
+            up++;
+        }
+        while (players[down].rating < pivot){
+            down--;
+        }
+        if (up < down)
+            swap(players[up], players[down]);
+    }
+    swap(players[low], players[down]);
+    return down;
+}
+
 void MatchMap::topRatedPlayers() {
     vector<Player> players;
     cout << R"(1 - Champions Tour 2023: Americas Last Chance Qualifier
@@ -453,11 +511,55 @@ Please choose an integer between 1 - 515; 150 is reccomended.
     int rounds;
     cin >> rounds;
 
+
     if (k == -1) {
         cout << R"(Do you want to use quicksort or heapsort
 1 - Quick sort
 2- Heap sort
 )";
+        int sorting_algorithm;
+        cin >> sorting_algorithm;
+
+        //chrono::high_resolution_clock::time_point start;
+        //chrono::high_resolution_clock::time_point stop;
+        //chrono::high_resolution_clock::duration duration;
+
+        if (sorting_algorithm == 1){
+            //create vector
+            vector<Player> players;
+            for (auto &iter : playerStatsMap[tournament]) {
+                if (iter.second.rounds >= rounds)
+                    players.push_back(iter.second);
+            }
+
+            auto start = chrono::high_resolution_clock::now();
+
+            QuickSort(players, 0, players.size()-1);
+
+            auto stop = chrono::high_resolution_clock::now();
+
+            auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+            cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
+
+            int i = 1;
+            for (auto &player : players) {
+                cout << i << ". " << player.name << " Rating: " << player.rating << endl;
+                i++;
+
+
+            }
+
+        }
+        else if (sorting_algorithm==2) {
+            auto start = chrono::high_resolution_clock::now();
+            players = HeapSort(tournament, rounds);
+
+            auto stop = chrono::high_resolution_clock::now();
+
+            auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+
+            cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
+        }
 
     }
     else if (k >= 1 && k <= 100) {
@@ -468,5 +570,6 @@ Please choose an integer between 1 - 515; 150 is reccomended.
         cout << i << ". " << player.name << " Rating: " << player.rating << endl;
         i++;
     }
+
 
 }

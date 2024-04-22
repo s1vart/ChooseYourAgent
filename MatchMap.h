@@ -22,6 +22,9 @@ class MatchMap {
     void gamesPerMapHelper(const string& map);
     void countTeamComps(vector<string>&teamcompVector, string map);
     vector<Player> kLargestRatings(string& tournament, int k, int minRounds);
+    void QuickSort(vector<Player>& players, int low, int high);
+    int partition(vector<Player>& players, int low, int high);
+    vector<Player> HeapSort(string& tournament, int minRounds);
 
 
 public:
