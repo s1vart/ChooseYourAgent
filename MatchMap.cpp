@@ -365,25 +365,29 @@ struct CompareByRating {
 vector<Player> MatchMap::kLargestRatings(string& tournament, int k, int minRounds) {
     vector<Player> players;
     for (auto &iter : playerStatsMap[tournament]) {
-        players.push_back(iter.second);
+        if (iter.second.rounds >= minRounds)
+            players.push_back(iter.second);
     }
 
 
     priority_queue<Player, vector<Player>, CompareByRating> minHeap;
 
     // Push the first k players into the min heap
-    int j = 0;
-    while (minHeap.size() < k) {
-        if (players[j].rounds >= minRounds)
-            minHeap.push(players[j]);
-        j++;
+    if (players.size() < k) {
+        for (const auto & player : players) {
+            minHeap.push(player);
+        }
     }
-
-    // For the rest of the players, if the player's rating is greater than the top player's rating of the min heap, pop the top and push the current player
-    for (int i = k; i < players.size(); ++i) {
-        if (players[i].rating > minHeap.top().rating && players[i].rounds >= minRounds) {
-            minHeap.pop();
+    else {
+        for (int i = 0; i < k; ++i) {
             minHeap.push(players[i]);
+        }
+        // For the rest of the players, if the player's rating is greater than the top player's rating of the min heap, pop the top and push the current player
+        for (int i = k; i < players.size(); ++i) {
+            if (players[i].rating > minHeap.top().rating) {
+                minHeap.pop();
+                minHeap.push(players[i]);
+            }
         }
     }
 
