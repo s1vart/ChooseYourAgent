@@ -1,4 +1,5 @@
 DO NOT DOWNLOAD THE CMAKE FILES in cmake-debug. This is covered in the video
+https://www.youtube.com/watch?v=e4jrZjPcRp8
 Download all of the .h and .cpp files from the project directory
 download the vct2021, vct2022, and vct2023 folders from inside the cmake-debug directory
   - These folders contain all the data that was used in this project
