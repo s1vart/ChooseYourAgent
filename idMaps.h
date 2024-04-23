@@ -47,8 +47,8 @@ private:
     }
 
 public:
-    idMaps() {
-        storeCSVData("vct2023/tournaments_stages_match_types_ids.csv");
+    idMaps(string match_types_ids) {
+        storeCSVData(match_types_ids);
     }
     // Function to add match information
     void addMatchInfo(const string& tournament, const string& stage, const string& matchType, int tournamentID, int stageID, int matchTypeID) {

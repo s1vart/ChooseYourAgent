@@ -6,50 +6,63 @@
 #include <algorithm>
 #include <queue>
 #include <chrono>
+#include <cstring>
 
 
 using namespace std;
 
-MatchMap::MatchMap(const std::string& filename) {
-    std::unordered_map<int, Match> matches;
-    std::ifstream file(filename);
-    std::string line;
-    std::getline(file, line);
-    while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string token;
+MatchMap::MatchMap(string year, idMaps& idMap) {
+    string filename;
+    if (year == "2023")
+        filename = matchIDCSV2023;
+    if (year == "2022")
+        filename = matchIDCSV2022;
+    if (year == "2021")
+        filename = matchIDCSV2021;
+    unordered_map<int, Match> matches;
+    ifstream file(filename);
+    string line;
+    getline(file, line);
+    int i = 1;
+    while (getline(file, line)) {
+        istringstream iss(line);
+        string token;
         Match match;
 
-        std::getline(iss, token, ',');
+        getline(iss, token, ',');
         match.tournament = token;
 
-        std::getline(iss, token, ',');
+        getline(iss, token, ',');
+//        cout << token << " ";
+//        cout << i << endl;
         match.tournamentID = stoi(token);
 
-        std::getline(iss, token, ',');
+        getline(iss, token, ',');
         match.stage = token;
 
-        std::getline(iss, token, ',');
+        getline(iss, token, ',');
+
         match.stageID = stoi(token);
 
-        std::getline(iss, token, ',');
+        getline(iss, token, ',');
         match.matchType = token;
 
-        std::getline(iss, token, ',');
+        getline(iss, token, ',');
         match.matchName = token;
 
         match.parseTeams(match.matchName);
 
-        std::getline(iss, token, ',');
+        getline(iss, token, ',');
+
         match.matchID = stoi(token);
 
-        std::getline(iss, token, ','); // Skip Game ID
+        getline(iss, token, ','); // Skip Game ID
         string map = token;
-        std::getline(iss, token, ','); // map
+        getline(iss, token, ','); // map
         string gameID = token;
 
         gamesPerMapHelper(map);
-
+        i++;
         match.matchTypeID = idMap.getMatchTypeID(match.tournament,match.stage,match.matchType);
 
         Game game(match.team1, match.team2, stoi(gameID), map);
@@ -66,7 +79,7 @@ MatchMap::MatchMap(const std::string& filename) {
     this->uniqueIDHashMap = matches;
     // setting our other map so we can get matches through match info / no unique identifier
     setData();
-    addGameData();
+    addGameData(year);
 }
 
 int MatchMap::size() {
@@ -74,7 +87,7 @@ int MatchMap::size() {
 }
 
 void MatchMap::setData() {
-    for (auto iter : uniqueIDHashMap) {
+    for (auto &iter : uniqueIDHashMap) {
         // data[tournament][stage][matchType][match name] = match;
         data[iter.second.tournament][iter.second.stage][iter.second.matchType][iter.second.matchName] = iter.second;
     }
@@ -120,41 +133,49 @@ vector<Match> MatchMap::searchForMatch(string team) {
     return output;
 }
 
-void MatchMap::addGameData() {
-    std::unordered_map<int, Match> matches;
-    std::ifstream file(agentPickCSV);
-    std::string line;
-    std::getline(file, line);
+void MatchMap::addGameData(string year) {
+    string filename;
+    unordered_map<int, Match> matches;
+    if (year == "2023")
+        filename = agentPickCSV2023;
+    else if (year == "2022")
+        filename = agentPickCSV2022;
+    else {
+        filename = agentPickCSV2021;
+    }
+    ifstream file(filename);
+    string line;
+    getline(file, line);
     int i = 0;
-    while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string token;
+    while (getline(file, line)) {
+        istringstream iss(line);
+        string token;
 
-        std::getline(iss, token, ','); // tournament
+        getline(iss, token, ','); // tournament
         string tournament = token;
 
-        std::getline(iss, token, ','); // stage
+        getline(iss, token, ','); // stage
         string stage = token;
 
-        std::getline(iss, token, ','); // match type
+        getline(iss, token, ','); // match type
         string matchType = token;
 
-        std::getline(iss, token, ','); // map
+        getline(iss, token, ','); // map
         string map = token;
 
-        std::getline(iss, token, ','); // team
+        getline(iss, token, ','); // team
         string team = token;
 
-        std::getline(iss, token, ','); // agent picked
+        getline(iss, token, ','); // agent picked
         string agent = token;
 
-        std::getline(iss, token, ','); // total wins by map
+        getline(iss, token, ','); // total wins by map
         string win = token;
 
-        std::getline(iss, token, ','); // total loss by map
+        getline(iss, token, ','); // total loss by map
         string loss = token;
 
-        std::getline(iss, token, ','); // total maps played
+        getline(iss, token, ','); // total maps played
         if (stage != "All Stages") {
             for (auto &iter: data[tournament][stage][matchType]) { // for every match in this section of the tournament
                 if (iter.second.games.find(map) != iter.second.games.end()) {
@@ -193,8 +214,6 @@ void MatchMap::addGameData() {
                 }
             }
         }
-
-
     }
 }
 
@@ -223,12 +242,50 @@ void MatchMap::checkTeamComps() {
 
 void MatchMap::sortTeamComp(vector<string> &teamcompVector, string map) {
     if (teamcompVector.size() == 5)
-        std::sort(teamcompVector.begin(), teamcompVector.end());
+        sort(teamcompVector.begin(), teamcompVector.end());
 }
 
-void MatchMap::mostPopularTeamComp(string map) {
+void MatchMap::mostPopularTeamComp(string year) {
+    string map;
+    if (year == "2023") {
+        cout << R"(What Map would you like to view?
+Ascent
+Fracture
+Haven
+Icebox
+Lotus
+Pearl
+Split
+Please type the name of map as it is written above (case sensitive)
+)";
+    }
+    else if (year == "2022") {
+        cout << R"(What Map would you like to view?
+Ascent
+Bind
+Breeze
+Fracture
+Haven
+Icebox
+Split
+Please type the name of map as it is written above (case sensitive)
+)";
+    }
+    else if (year == "2021") {
+        cout << R"(What Map would you like to view?
+Ascent
+Bind
+Breeze
+Fracture
+Haven
+Icebox
+Split
+Please type the name of map as it is written above (case sensitive)
+)";
+    }
+    cin >> map;
     if (teamCompTotalPicks.find(map) == teamCompTotalPicks.end()) {
-        cout << map << " was not played during this time period\n";
+        cout << "Please ensure the map name was spelled correctly\n";
         return;
     }
     string mostPicked;
@@ -243,8 +300,8 @@ void MatchMap::mostPopularTeamComp(string map) {
     << " is " << mostPicked << "\nwhich was played a total of " << timesPicked
     << " times in " << totalGamesPerMap[map] << " games\n";
     if (timesPicked >= totalGamesPerMap[map])
-        cout <<"\tThis number can be bigger than the number of games because BOTH\n"
-        "\tteams are able to pick the same composition\n";
+        cout <<"**Note** This number can be bigger than the number of games\n"
+        "since both teams are able to pick the same composition\n";
 }
 
 void MatchMap::gamesPerMapHelper(const string& map) {
@@ -269,79 +326,87 @@ void MatchMap::countTeamComps(vector<string> &teamcompVector, string map) {
     }
 }
 
-void MatchMap::setPlayerStats() {
-    std::ifstream file(playerStatsCSV);
-    std::string line;
-    std::getline(file, line);
+void MatchMap::setPlayerStats(string year) {
+    string filename;
+    if (year == "2023")
+        filename = playerStatsCSV2023;
+    else if (year == "2022")
+        filename = playerStatsCSV2022;
+    else
+        filename = playerStatsCSV2021;
+    
+    ifstream file(filename);
+    string line;
+    getline(file, line);
     int i = 0;
-    while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string token;
+    while (getline(file, line)) {
+        istringstream iss(line);
+        string token;
         Player player;
 
-        std::getline(iss, token, ','); // tournament
+        getline(iss, token, ','); // tournament
         player.tournament = token;
 
-        std::getline(iss, token, ','); // stage
+        getline(iss, token, ','); // stage
         player.stage = token;
 
-        std::getline(iss, token, ','); // match type
+        getline(iss, token, ','); // match type
         string matchType = token;
 
-        std::getline(iss, token, ','); // player
+        getline(iss, token, ','); // player
         player.name = token;
 
-        std::getline(iss, token, ','); // team
+        getline(iss, token, ','); // team
         player.team = token;
 
-        std::getline(iss, token, ','); // agent(s) picked
+        getline(iss, token, ','); // agent(s) picked
         player.agents = token;
 
-        std::getline(iss, token, ','); // rounds played
+        getline(iss, token, ','); // rounds played
         player.rounds = stoi(token);
-        std::getline(iss, token, ','); // rating
+        getline(iss, token, ','); // rating
         if (!token.empty())
             player.rating = stof(token);
         else {
             player.rating = -1;
         }
-        std::getline(iss, token, ','); // Average combat score
+        getline(iss, token, ','); // Average combat score
         if (!token.empty())
             player.ACS = stoi(token);
         else {
             player.ACS = -1;
         }
-        std::getline(iss, token, ','); // k/d ratio
+        getline(iss, token, ','); // k/d ratio
 
-        std::getline(iss, token, ','); // KAST %
+        getline(iss, token, ','); // KAST %
 
-        std::getline(iss, token, ','); // ADR
+        getline(iss, token, ','); // ADR
 
-        std::getline(iss, token, ','); // kills per round
+        getline(iss, token, ','); // kills per round
 
-        std::getline(iss, token, ','); // assists per round
+        getline(iss, token, ','); // assists per round
 
-        std::getline(iss, token, ','); // first kills per round
+        getline(iss, token, ','); // first kills per round
 
-        std::getline(iss, token, ','); // first deaths per round
+        getline(iss, token, ','); // first deaths per round
 
-        std::getline(iss, token, ','); // headshot %
+        getline(iss, token, ','); // headshot %
 
-        std::getline(iss, token, ','); // clutch success %
+        getline(iss, token, ','); // clutch success %
 
-        std::getline(iss, token, ','); // clutches won/played
+        getline(iss, token, ','); // clutches won/played
 
-        std::getline(iss, token, ','); // max kills in a single map
+        getline(iss, token, ','); // max kills in a single map
 
-        std::getline(iss, token, ','); // kills
+        getline(iss, token, ','); // kills
 
-        std::getline(iss, token, ','); // deaths
+        getline(iss, token, ','); // deaths
 
-        std::getline(iss, token, ','); // assists
+        getline(iss, token, ','); // assists
 
-        std::getline(iss, token, ','); // first kills
+        getline(iss, token, ','); // first kills
 
-        std::getline(iss, token, ','); // first deaths
+        getline(iss, token, ','); // first deaths
         if (player.stage == "All Stages") {
             if (playerStatsMap[player.tournament].find(player.name) == playerStatsMap[player.tournament].end()) {
                 playerStatsMap[player.tournament].emplace(player.name, player);
@@ -461,9 +526,9 @@ int MatchMap::partition(vector<Player>& players, int low, int high){
     return down;
 }
 
-void MatchMap::topRatedPlayers() {
+void MatchMap::topRatedPlayers23() {
     vector<Player> players;
-    cout << R"(1 - Champions Tour 2023: Americas Last Chance Qualifier
+        cout << R"(1 - Champions Tour 2023: Americas Last Chance Qualifier
 2 - Champions Tour 2023: Pacific Last Chance Qualifier
 3 - Champions Tour 2023: EMEA Last Chance Qualifier
 4 - Champions Tour 2023: Masters Tokyo
@@ -474,6 +539,7 @@ void MatchMap::topRatedPlayers() {
 9 - Valorant Champions 2023
 Type an integer 1 - 9 to select a Tournament
 )";
+
     int tournamentChoice;
     cin >> tournamentChoice;
 
@@ -505,7 +571,7 @@ player ratings in a descending order
     int k;
     cin >> k;
 
-    cout << R"(What is the minimum number of rounds to be including in this list?
+    cout << R"(What is the minimum number of rounds played to be included in this list?
 Please choose an integer between 1 - 515; 150 is reccomended.
 )";
     int rounds;
@@ -515,7 +581,7 @@ Please choose an integer between 1 - 515; 150 is reccomended.
     if (k == -1) {
         cout << R"(Do you want to use quicksort or heapsort
 1 - Quick sort
-2- Heap sort
+2 - Heap sort
 )";
         int sorting_algorithm;
         cin >> sorting_algorithm;
@@ -573,3 +639,186 @@ Please choose an integer between 1 - 515; 150 is reccomended.
 
 
 }
+
+void MatchMap::topRatedPlayers21() {
+    vector<Player> players;
+    cout << R"(1 - Valorant Champions Tour Stage 3: Masters Berlin
+2 - Valorant Champions 2021
+3 - Valorant Champions Tour Stage 2: Masters Reykjavík
+Type an integer 1 - 3 to select a Tournament
+)";
+
+    int tournamentChoice;
+    cin >> tournamentChoice;
+
+    string tournament;
+    if (tournamentChoice == 1)
+        tournament = "Valorant Champions Tour Stage 3: Masters Berlin";
+    else if (tournamentChoice == 2)
+        tournament = "Valorant Champions 2021";
+    else if (tournamentChoice == 3)
+        tournament = "Valorant Champions Tour Stage 2: Masters Reykjavík";
+
+    cout << R"(This function displays the K top rated players from a tournament.
+Enter and integer between 1 - 100 for K, or enter -1 to view all
+player ratings in a descending order
+)";
+
+    int k;
+    cin >> k;
+
+    cout << R"(What is the minimum number of rounds played to be included in this list?
+Please choose an integer between 1 - 200; 150 is reccomended.
+)";
+    int rounds;
+    cin >> rounds;
+
+
+    if (k == -1) {
+        cout << R"(Do you want to use quicksort or heapsort
+1 - Quick sort
+2 - Heap sort
+)";
+        int sorting_algorithm;
+        cin >> sorting_algorithm;
+
+
+        if (sorting_algorithm == 1){
+            //create vector
+            vector<Player> players;
+            for (auto &iter : playerStatsMap[tournament]) {
+                if (iter.second.rounds >= rounds)
+                    players.push_back(iter.second);
+            }
+
+            auto start = chrono::high_resolution_clock::now();
+
+            QuickSort(players, 0, players.size()-1);
+
+            auto stop = chrono::high_resolution_clock::now();
+
+            auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+            cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
+
+            int i = 1;
+            for (auto &player : players) {
+                cout << i << ". " << player.name << " Rating: " << player.rating << endl;
+                i++;
+
+
+            }
+
+        }
+        else if (sorting_algorithm==2) {
+            auto start = chrono::high_resolution_clock::now();
+            players = HeapSort(tournament, rounds);
+
+            auto stop = chrono::high_resolution_clock::now();
+
+            auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+
+            cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
+        }
+
+    }
+    else if (k >= 1 && k <= 100) {
+        players = kLargestRatings(tournament, k, rounds);
+    }
+    int i = 1;
+    for (auto &player : players) {
+        cout << i << ". " << player.name << " Rating: " << player.rating << endl;
+        i++;
+    }
+}
+
+void MatchMap::topRatedPlayers22() {
+    vector<Player> players;
+    cout << R"(1 - Valorant Champions Tour Stage 1: Masters Reykjavík
+2 - Valorant Champions Tour Stage 2: Masters Copenhagen
+3 - Valorant Champions 2022
+Type an integer 1 - 3 to select a Tournament
+)";
+
+    int tournamentChoice;
+    cin >> tournamentChoice;
+
+    string tournament;
+    if (tournamentChoice == 1)
+        tournament = "Valorant Champions Tour Stage 1: Masters Reykjavík";
+    else if (tournamentChoice == 2)
+        tournament = "Valorant Champions Tour Stage 2: Masters Copenhagen";
+    else if (tournamentChoice == 3)
+        tournament = "Valorant Champions 2022";
+
+    cout << R"(This function displays the K top rated players from a tournament.
+Enter and integer between 1 - 100 for K, or enter -1 to view all
+player ratings in a descending order
+)";
+
+    int k;
+    cin >> k;
+
+    cout << R"(What is the minimum number of rounds played to be included in this list?
+Please choose an integer between 1 - 200; 150 is reccomended.
+)";
+    int rounds;
+    cin >> rounds;
+
+
+    if (k == -1) {
+        cout << R"(Do you want to use quicksort or heapsort
+1 - Quick sort
+2 - Heap sort
+)";
+        int sorting_algorithm;
+        cin >> sorting_algorithm;
+
+
+        if (sorting_algorithm == 1){
+            //create vector
+            vector<Player> players;
+            for (auto &iter : playerStatsMap[tournament]) {
+                if (iter.second.rounds >= rounds)
+                    players.push_back(iter.second);
+            }
+
+            auto start = chrono::high_resolution_clock::now();
+
+            QuickSort(players, 0, players.size()-1);
+
+            auto stop = chrono::high_resolution_clock::now();
+
+            auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+            cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
+
+            int i = 1;
+            for (auto &player : players) {
+                cout << i << ". " << player.name << " Rating: " << player.rating << endl;
+                i++;
+
+
+            }
+
+        }
+        else if (sorting_algorithm==2) {
+            auto start = chrono::high_resolution_clock::now();
+            players = HeapSort(tournament, rounds);
+
+            auto stop = chrono::high_resolution_clock::now();
+
+            auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+
+            cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
+        }
+
+    }
+    else if (k >= 1 && k <= 100) {
+        players = kLargestRatings(tournament, k, rounds);
+    }
+    int i = 1;
+    for (auto &player : players) {
+        cout << i << ". " << player.name << " Rating: " << player.rating << endl;
+        i++;
+    }
+}
+

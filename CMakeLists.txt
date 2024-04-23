@@ -10,4 +10,5 @@ add_executable(ChooseYourAgent main.cpp
         idMaps.h
         MatchMap.cpp
         Player.h
+        runner.h
 )
